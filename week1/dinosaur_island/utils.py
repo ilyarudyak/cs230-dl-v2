@@ -48,7 +48,9 @@ def rnn_step_forward(parameters, a_prev, x):
     Waa, Wax, Wya, by, b = parameters['Waa'], parameters['Wax'], parameters['Wya'], \
                            parameters['by'], parameters['b']
     a_next = np.tanh(np.dot(Wax, x) + np.dot(Waa, a_prev) + b)  # hidden state
-    p_t = softmax(np.dot(Wya, a_next) + by)  # unnormalized log probabilities for next chars # probabilities for next chars
+
+    # unnormalized log probabilities for next chars # probabilities for next chars
+    p_t = softmax(np.dot(Wya, a_next) + by)
 
     return a_next, p_t
 
@@ -86,9 +88,10 @@ def rnn_forward(X, Y, a0, parameters, vocab_size=27):
     for t in range(len(X)):
 
         # Set x[t] to be the one-hot vector representation of the t'th character in X.
-        # if X[t] == None, we just have x[t]=0. This is used to set the input for the first timestep to the zero vector. 
+        # if X[t] == None, we just have x[t]=0. This is used to set the input for the first
+        # timestep to the zero vector.
         x[t] = np.zeros((vocab_size, 1))
-        if (X[t] != None):
+        if X[t] is not None:
             x[t][X[t]] = 1
 
         # Run one step forward of the RNN

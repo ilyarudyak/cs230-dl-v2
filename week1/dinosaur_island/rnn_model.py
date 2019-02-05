@@ -52,7 +52,7 @@ def optimize(X, Y, a_prev, parameters, learning_rate=0.01):
     return loss, gradients, a[len(X) - 1]
 
 
-def model(data, ix_to_char, char_to_ix, num_iterations=10000, n_a=50, dino_names=7, vocab_size=27):
+def model(data, ix_to_char, char_to_ix, num_iterations=10001, n_a=50, dino_names=7, vocab_size=27):
     """
     Trains the model and generates dinosaur names.
 

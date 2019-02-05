@@ -54,7 +54,8 @@ def sample(parameters, char_to_ix, seed):
     # Step 1': Initialize a_prev as zeros (≈1 line)
     a_prev = np.zeros((n_a, 1))
 
-    # Create an empty list of indices, this is the list which will contain the list of indices of the characters to generate (≈1 line)
+    # Create an empty list of indices, this is the list which will contain the list of indices of
+    # the characters to generate (≈1 line)
     indices = []
 
     # Idx is a flag to detect a newline character, we initialize it to -1
@@ -66,7 +67,7 @@ def sample(parameters, char_to_ix, seed):
     counter = 0
     newline_character = char_to_ix['\n']
 
-    while (idx != newline_character and counter != 50):
+    while (idx != newline_character) and (counter != 50):
         # Step 2: Forward propagate x using the equations (1), (2) and (3)
         a = np.tanh(np.dot(Wax, x) + np.dot(Waa, a_prev) + b)
         z = np.dot(Wya, a) + by
@@ -96,7 +97,7 @@ def sample(parameters, char_to_ix, seed):
 
     ### END CODE HERE ###
 
-    if (counter == 50):
+    if counter == 50:
         indices.append(char_to_ix['\n'])
 
     return indices
