@@ -11,7 +11,8 @@ import random
 import sys
 import io
 
-def build_data(text, Tx = 40, stride = 3):
+
+def build_data(text, Tx=40, stride=3):
     """
     Create a training set by scanning a window of size Tx over the text corpus, with stride 3.
     
@@ -23,8 +24,26 @@ def build_data(text, Tx = 40, stride = 3):
     Returns:
     X -- list of training examples
     Y -- list of training labels
+    example:
+    In [33]: X[:10]
+    Out[33]:
+    ['the sonnets\n\nby william shakespeare\n\nfro',  - this is text[0:40]
+     ' sonnets\n\nby william shakespeare\n\nfrom f',  - this is text[3:43]
+     'nnets\n\nby william shakespeare\n\nfrom fair',
+     'ts\n\nby william shakespeare\n\nfrom fairest',
+     '\nby william shakespeare\n\nfrom fairest cr',
+     ' william shakespeare\n\nfrom fairest creat',
+     'lliam shakespeare\n\nfrom fairest creature',
+     'am shakespeare\n\nfrom fairest creatures w',
+     'shakespeare\n\nfrom fairest creatures we d',
+     'kespeare\n\nfrom fairest creatures we desi']
+
+     In [38]: Y[:10]
+     Out[38]: ['m', 'a', 'e', ' ', 'e', 'u', 's', 'e', 'e', 'r']
+     How do we get 'm'? This is text[40]. And what about 'a'? That's text[43] and so on.
+
     """
-    
+
     X = []
     Y = []
 
@@ -33,13 +52,13 @@ def build_data(text, Tx = 40, stride = 3):
         X.append(text[i: i + Tx])
         Y.append(text[i + Tx])
     ### END CODE HERE ###
-    
+
     print('number of training examples:', len(X))
-    
+
     return X, Y
 
 
-def vectorization(X, Y, n_x, char_indices, Tx = 40):
+def vectorization(X, Y, n_x, char_indices, Tx=40):
     """
     Convert X and Y (lists) into arrays to be given to a recurrent neural network.
     
@@ -51,8 +70,15 @@ def vectorization(X, Y, n_x, char_indices, Tx = 40):
     Returns:
     x -- array of shape (m, Tx, len(chars))
     y -- array of shape (m, len(chars))
+    So we just build one-hot encoding.
+    Example:
+    Y[0] = 'm' char_indices['m'] = 18 y[0][18] = True
+    y[0] = [False, False, False, False, False, False, False, False, False,
+            False, False, False, False, False, False, False, False, False,
+            True, False, False, False, False, False, False, False, False,
+            False, False]
     """
-    
+
     m = len(X)
     x = np.zeros((m, Tx, n_x), dtype=np.bool)
     y = np.zeros((m, n_x), dtype=np.bool)
@@ -60,8 +86,8 @@ def vectorization(X, Y, n_x, char_indices, Tx = 40):
         for t, char in enumerate(sentence):
             x[i, t, char_indices[char]] = 1
         y[i, char_indices[Y[i]]] = 1
-        
-    return x, y 
+
+    return x, y
 
 
 def sample(preds, temperature=1.0):
@@ -71,26 +97,29 @@ def sample(preds, temperature=1.0):
     exp_preds = np.exp(preds)
     preds = exp_preds / np.sum(exp_preds)
     probas = np.random.multinomial(1, preds, 1)
-    out = np.random.choice(range(len(chars)), p = probas.ravel())
+    out = np.random.choice(range(len(chars)), p=probas.ravel())
     return out
-    #return np.argmax(probas)
-    
+    # return np.argmax(probas)
+
+
 def on_epoch_end(epoch, logs):
     # Function invoked at end of each epoch. Prints generated text.
     None
-    #start_index = random.randint(0, len(text) - Tx - 1)
-    
-    #generated = ''
-    #sentence = text[start_index: start_index + Tx]
-    #sentence = '0'*Tx
-    #usr_input = input("Write the beginning of your poem, the Shakespearian machine will complete it.")
-    # zero pad the sentence to Tx characters.
-    #sentence = ('{0:0>' + str(Tx) + '}').format(usr_input).lower()
-    #generated += sentence
-#
-    #sys.stdout.write(usr_input)
+    # start_index = random.randint(0, len(text) - Tx - 1)
 
-    #for i in range(400):
+    # generated = ''
+    # sentence = text[start_index: start_index + Tx]
+    # sentence = '0'*Tx
+    # usr_input = input("Write the beginning of your poem, the Shakespearian machine will complete it.")
+    # zero pad the sentence to Tx characters.
+    # sentence = ('{0:0>' + str(Tx) + '}').format(usr_input).lower()
+    # generated += sentence
+
+
+#
+# sys.stdout.write(usr_input)
+
+# for i in range(400):
 """
         #x_pred = np.zeros((1, Tx, len(chars)))
 
@@ -113,35 +142,37 @@ def on_epoch_end(epoch, logs):
         
     # Stop at the end of a line (4 lines)
     print()
- """   
+ """
 print("Loading text data...")
 text = io.open('shakespeare.txt', encoding='utf-8').read().lower()
-#print('corpus length:', len(text))
+# print('corpus length:', len(text))
 
 Tx = 40
 chars = sorted(list(set(text)))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
-#print('number of unique characters in the corpus:', len(chars))
+# print('number of unique characters in the corpus:', len(chars))
 
 print("Creating training set...")
-X, Y = build_data(text, Tx, stride = 3)
+X, Y = build_data(text, Tx, stride=3)
 print("Vectorizing training set...")
-x, y = vectorization(X, Y, n_x = len(chars), char_indices = char_indices) 
+x, y = vectorization(X, Y, n_x=len(chars), char_indices=char_indices)
 print("Loading model...")
 model = load_model('models/model_shakespeare_kiank_350_epoch.h5')
 
 
 def generate_output():
     generated = ''
-    #sentence = text[start_index: start_index + Tx]
-    #sentence = '0'*Tx
+    # sentence = text[start_index: start_index + Tx]
+    # sentence = '0'*Tx
     usr_input = input("Write the beginning of your poem, the Shakespeare machine will complete it. Your input is: ")
-    # zero pad the sentence to Tx characters.
-    sentence = ('{0:0>' + str(Tx) + '}').format(usr_input).lower()
-    generated += usr_input 
 
-    sys.stdout.write("\n\nHere is your poem: \n\n") 
+    # zero pad the sentence to Tx characters.
+    # example: '0000000000forsooth this maketh no sense '
+    sentence = ('{0:0>' + str(Tx) + '}').format(usr_input).lower()
+    generated += usr_input
+
+    sys.stdout.write("\n\nHere is your poem: \n\n")
     sys.stdout.write(usr_input)
     for i in range(400):
 
@@ -152,7 +183,7 @@ def generate_output():
                 x_pred[0, t, char_indices[char]] = 1.
 
         preds = model.predict(x_pred, verbose=0)[0]
-        next_index = sample(preds, temperature = 1.0)
+        next_index = sample(preds, temperature=1.0)
         next_char = indices_char[next_index]
 
         generated += next_char
