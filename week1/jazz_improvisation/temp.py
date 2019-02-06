@@ -1,0 +1,1 @@
+[list(x).index(True) for x in X[0, :, :]]

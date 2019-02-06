@@ -1,5 +1,5 @@
-from music_utils import * 
-from preprocess import * 
+from music_utils import *
+from preprocess import *
 from keras.utils import to_categorical
 
 chords, abstract_grammars = get_musical_data('data/original_metheny.mid')
@@ -10,15 +10,17 @@ x_initializer = np.zeros((1, 1, 78))
 a_initializer = np.zeros((1, n_a))
 c_initializer = np.zeros((1, n_a))
 
+
 def load_music_utils():
     chords, abstract_grammars = get_musical_data('data/original_metheny.mid')
     corpus, tones, tones_indices, indices_tones = get_corpus_data(abstract_grammars)
     N_tones = len(set(corpus))
-    X, Y, N_tones = data_processing(corpus, tones_indices, 60, 30)   
+    X, Y, N_tones = data_processing(corpus, tones_indices, 60, 30)
     return (X, Y, N_tones, indices_tones)
 
 
-def generate_music(inference_model, corpus = corpus, abstract_grammars = abstract_grammars, tones = tones, tones_indices = tones_indices, indices_tones = indices_tones, T_y = 10, max_tries = 1000, diversity = 0.5):
+def generate_music(inference_model, corpus=corpus, abstract_grammars=abstract_grammars, tones=tones,
+                   tones_indices=tones_indices, indices_tones=indices_tones, T_y=10, max_tries=1000, diversity=0.5):
     """
     Generates music using a model trained to learn musical patterns of a jazz soloist. Creates an audio stream
     to save the music and play it.
@@ -36,45 +38,45 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
     Returns:
     predicted_tones -- python list containing predicted tones
     """
-    
+
     # set up audio stream
     out_stream = stream.Stream()
-    
+
     # Initialize chord variables
-    curr_offset = 0.0                                     # variable used to write sounds to the Stream.
-    num_chords = int(len(chords) / 3)                     # number of different set of chords
-    
+    curr_offset = 0.0  # variable used to write sounds to the Stream.
+    num_chords = int(len(chords) / 3)  # number of different set of chords
+
     print("Predicting new values for different set of chords.")
     # Loop over all 18 set of chords. At each iteration generate a sequence of tones
     # and use the current chords to convert it into actual sounds 
     for i in range(1, num_chords):
-        
+
         # Retrieve current chord from stream
         curr_chords = stream.Voice()
-        
+
         # Loop over the chords of the current set of chords
         for j in chords[i]:
             # Add chord to the current chords with the adequate offset, no need to understand this
             curr_chords.insert((j.offset % 4), j)
-        
+
         # Generate a sequence of tones using the model
         _, indices = predict_and_sample(inference_model)
         indices = list(indices.squeeze())
         pred = [indices_tones[p] for p in indices]
-        
+
         predicted_tones = 'C,0.25 '
         for k in range(len(pred) - 1):
-            predicted_tones += pred[k] + ' ' 
-        
-        predicted_tones +=  pred[-1]
-                
+            predicted_tones += pred[k] + ' '
+
+        predicted_tones += pred[-1]
+
         #### POST PROCESSING OF THE PREDICTED TONES ####
         # We will consider "A" and "X" as "C" tones. It is a common choice.
-        predicted_tones = predicted_tones.replace(' A',' C').replace(' X',' C')
+        predicted_tones = predicted_tones.replace(' A', ' C').replace(' X', ' C')
 
         # Pruning #1: smoothing measure
         predicted_tones = prune_grammar(predicted_tones)
-        
+
         # Use predicted tones and current chords to generate sounds
         sounds = unparse_grammar(predicted_tones, curr_chords)
 
@@ -85,8 +87,9 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
         sounds = clean_up_notes(sounds)
 
         # Print number of tones/notes in sounds
-        print('Generated %s sounds using the predicted values for the set of chords ("%s") and after pruning' % (len([k for k in sounds if isinstance(k, note.Note)]), i))
-        
+        print('Generated %s sounds using the predicted values for the set of chords ("%s") and after pruning' % (
+        len([k for k in sounds if isinstance(k, note.Note)]), i))
+
         # Insert sounds into the output stream
         for m in sounds:
             out_stream.insert(curr_offset + m.offset, m)
@@ -94,7 +97,7 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
             out_stream.insert(curr_offset + mc.offset, mc)
 
         curr_offset += 4.0
-        
+
     # Initialize tempo of the output stream with 130 bit per minute
     out_stream.insert(0.0, tempo.MetronomeMark(number=130))
 
@@ -104,16 +107,16 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
     mf.write()
     print("Your generated music is saved in output/my_music.midi")
     mf.close()
-    
+
     # Play the final stream through output (see 'play' lambda function above)
     # play = lambda x: midi.realtime.StreamPlayer(x).play()
     # play(out_stream)
-    
+
     return out_stream
 
 
-def predict_and_sample(inference_model, x_initializer = x_initializer, a_initializer = a_initializer, 
-                       c_initializer = c_initializer):
+def predict_and_sample(inference_model, x_initializer=x_initializer, a_initializer=a_initializer,
+                       c_initializer=c_initializer):
     """
     Predicts the next value of values using the inference model.
     
@@ -128,11 +131,11 @@ def predict_and_sample(inference_model, x_initializer = x_initializer, a_initial
     results -- numpy-array of shape (Ty, 78), matrix of one-hot vectors representing the values generated
     indices -- numpy-array of shape (Ty, 1), matrix of indices representing the values generated
     """
-    
+
     ### START CODE HERE ###
     pred = inference_model.predict([x_initializer, a_initializer, c_initializer])
-    indices = np.argmax(pred, axis = -1)
+    indices = np.argmax(pred, axis=-1)
     results = to_categorical(indices, num_classes=78)
     ### END CODE HERE ###
-    
+
     return results, indices

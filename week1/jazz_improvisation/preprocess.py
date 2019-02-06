@@ -18,14 +18,16 @@ from grammar import *
 from grammar import parse_melody
 from music_utils import *
 
-#----------------------------HELPER FUNCTIONS----------------------------------#
+# ----------------------------HELPER FUNCTIONS----------------------------------#
 
 ''' Helper function to parse a MIDI file into its measures and chords '''
+
+
 def __parse_midi(data_fn):
     # Parse the MIDI data for separate melody and accompaniment parts.
     midi_data = converter.parse(data_fn)
     # Get melody part, compress into single voice.
-    melody_stream = midi_data[5]     # For Metheny piece, Melody is Part #5.
+    melody_stream = midi_data[5]  # For Metheny piece, Melody is Part #5.
     melody1, melody2 = melody_stream.getElementsByClass(stream.Voice)
     for j in melody2:
         melody1.insert(j.offset, j)
@@ -46,8 +48,8 @@ def __parse_midi(data_fn):
     # Verified are good parts: 0, 1, 6, 7 '''
     partIndices = [0, 1, 6, 7]
     comp_stream = stream.Voice()
-    comp_stream.append([j.flat for i, j in enumerate(midi_data) 
-        if i in partIndices])
+    comp_stream.append([j.flat for i, j in enumerate(midi_data)
+                        if i in partIndices])
 
     # Full stream containing both the melody and the accompaniment. 
     # All parts are flattened. 
@@ -67,7 +69,7 @@ def __parse_midi(data_fn):
         curr_part.append(part.getElementsByClass(tempo.MetronomeMark))
         curr_part.append(part.getElementsByClass(key.KeySignature))
         curr_part.append(part.getElementsByClass(meter.TimeSignature))
-        curr_part.append(part.getElementsByOffset(476, 548, 
+        curr_part.append(part.getElementsByOffset(476, 548,
                                                   includeEndBoundary=True))
         cp = curr_part.flat
         solo_stream.insert(cp)
@@ -78,7 +80,7 @@ def __parse_midi(data_fn):
     melody_stream = solo_stream[-1]
     measures = OrderedDict()
     offsetTuples = [(int(n.offset / 4), n) for n in melody_stream]
-    measureNum = 0 # for now, don't use real m. nums (119, 120)
+    measureNum = 0  # for now, don't use real m. nums (119, 120)
     for key_x, group in groupby(offsetTuples, lambda x: x[0]):
         measures[measureNum] = [n[1] for n in group]
         measureNum += 1
@@ -111,7 +113,10 @@ def __parse_midi(data_fn):
 
     return measures, chords
 
+
 ''' Helper function to get the grammatical data from given musical data. '''
+
+
 def __get_abstract_grammars(measures, chords):
     # extract grammars
     abstract_grammars = []
@@ -127,17 +132,22 @@ def __get_abstract_grammars(measures, chords):
 
     return abstract_grammars
 
-#----------------------------PUBLIC FUNCTIONS----------------------------------#
+
+# ----------------------------PUBLIC FUNCTIONS----------------------------------#
 
 ''' Get musical data from a MIDI file '''
+
+
 def get_musical_data(data_fn):
-    
     measures, chords = __parse_midi(data_fn)
     abstract_grammars = __get_abstract_grammars(measures, chords)
 
     return chords, abstract_grammars
 
+
 ''' Get corpus data from grammatical data '''
+
+
 def get_corpus_data(abstract_grammars):
     corpus = [x for sublist in abstract_grammars for x in sublist.split(' ')]
     values = set(corpus)
@@ -145,6 +155,7 @@ def get_corpus_data(abstract_grammars):
     indices_val = dict((i, v) for i, v in enumerate(values))
 
     return corpus, values, val_indices, indices_val
+
 
 '''
 def load_music_utils():
