@@ -198,3 +198,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+/week3/machine_translation/models/
+/week3/trigger_word_detection/models/
