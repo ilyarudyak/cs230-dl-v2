@@ -3,7 +3,9 @@ from keras.layers import RepeatVector, Dense, Activation, Lambda
 from keras.optimizers import Adam
 from keras.utils import to_categorical
 from keras.models import load_model, Model
+from keras.callbacks import TensorBoard
 import keras.backend as K
+
 import numpy as np
 
 from faker import Faker
@@ -24,6 +26,8 @@ class NMT:
         self.m = 10000
 
         self.opt = Adam(lr=0.005, beta_1=0.9, beta_2=0.999, decay=0.01)
+
+        self.callbacks = [TensorBoard(log_dir='logs')]
 
         self.examples = ['3 May 1979', '5 April 09', '21th of August 2016', 'Tue 10 Jul 2007',
                          'Saturday May 9 2018', 'March 3 2001', 'March 3rd 2001', '1 March 2001']
@@ -108,7 +112,8 @@ class NMT:
         s0 = np.zeros((self.m, self.n_s))
         c0 = np.zeros((self.m, self.n_s))
         outputs = list(self.Yoh.swapaxes(0, 1))
-        self.model.fit([self.Xoh, s0, c0], outputs, epochs=epochs, batch_size=100)
+        self.model.fit([self.Xoh, s0, c0], outputs, epochs=epochs,
+                       batch_size=100, callbacks=self.callbacks)
 
     def model_predict(self):
         s0 = np.zeros((self.m, self.n_s))
@@ -130,8 +135,8 @@ class NMT:
 
 if __name__ == '__main__':
     nmt = NMT()
-    # nmt.model_fit(epochs=1)
-    nmt.model_load_weights(file_path='models/model_kiank.h5')
-    nmt.model_predict()
+    nmt.model_fit(epochs=1)
+    # nmt.model_load_weights(file_path='models/model_kiank.h5')
+    # nmt.model_predict()
 
 
