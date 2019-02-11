@@ -113,7 +113,8 @@ class NMT:
         c0 = np.zeros((self.m, self.n_s))
         outputs = list(self.Yoh.swapaxes(0, 1))
         self.model.fit([self.Xoh, s0, c0], outputs, epochs=epochs,
-                       batch_size=100, callbacks=self.callbacks)
+                       batch_size=100, callbacks=self.callbacks,
+                       validation_split=.2)
 
     def model_predict(self):
         s0 = np.zeros((self.m, self.n_s))
@@ -135,7 +136,7 @@ class NMT:
 
 if __name__ == '__main__':
     nmt = NMT()
-    nmt.model_fit(epochs=1)
+    nmt.model_fit(epochs=5)
     # nmt.model_load_weights(file_path='models/model_kiank.h5')
     # nmt.model_predict()
 
