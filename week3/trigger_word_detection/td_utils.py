@@ -33,6 +33,7 @@ def load_raw_audio():
     negatives = []
     for filename in os.listdir("./raw_data/activates"):
         if filename.endswith("wav"):
+            # print(filename)
             activate = AudioSegment.from_wav("./raw_data/activates/"+filename)
             activates.append(activate)
     for filename in os.listdir("./raw_data/backgrounds"):

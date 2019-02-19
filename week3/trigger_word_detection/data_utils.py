@@ -90,8 +90,10 @@ def insert_audio_clip(background, audio_clip, previous_segments):
     # Step 2: Check if the new segment_time overlaps with one of the previous_segments. If so, keep
     # picking new segment_time at random until it doesn't overlap. (≈ 2 lines)
     segment_time = get_random_time_segment(segment_ms)
+    # print(segment_time)
     while is_overlapping(segment_time, previous_segments):
         segment_time = get_random_time_segment(segment_ms)
+        # print(segment_time)
 
     # Step 3: Add the new segment_time to the list of previous_segments (≈ 1 line)
     previous_segments.append(segment_time)
@@ -126,8 +128,16 @@ def insert_ones(y, segment_end_ms):
     # Add 1 to the correct index in the background label (y)
     ### START CODE HERE ### (≈ 3 lines)
     ones_start = segment_end_y + 1
-    ones_end = max(ones_start + 51, Ty)
+    ones_end = min(ones_start + 50, Ty)
+    print(f'ones_start={ones_start} ones_end={ones_end}')
     y[0, ones_start:ones_end] = 1.0
     ### END CODE HERE ###
 
     return y
+
+
+if __name__ == '__main__':
+    activates, negatives, backgrounds = load_raw_audio()
+    np.random.seed(5)
+    audio_clip, segment_time = insert_audio_clip(backgrounds[0], activates[0], [(3790, 4400)])
+    print("Segment Time: ", segment_time)
