@@ -93,5 +93,5 @@ if __name__ == '__main__':
          "food is ready", "not feeling happy"])
     Y_my_labels = np.array([[0], [0], [2], [1], [4], [3]])
 
-    pred = predict(X_my_sentences, Y_my_labels, W, b, word_to_vec_map)
-    print_predictions(X_my_sentences, pred)
+    pred_on_my_sent = predict(X_my_sentences, Y_my_labels, W, b, word_to_vec_map)
+    print_predictions(X_my_sentences, pred_on_my_sent)

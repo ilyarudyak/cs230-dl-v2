@@ -149,4 +149,6 @@ if __name__ == '__main__':
 
     model.fit(X_train_indices, Y_train_oh, epochs=50, batch_size=32, shuffle=True)
 
+    
+
 
