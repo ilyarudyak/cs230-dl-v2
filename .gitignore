@@ -202,3 +202,5 @@ venv.bak/
 /week3/machine_translation/logs/
 /week3/trigger_word_detection/XY_dev/
 /week3/trigger_word_detection/XY_train/
+/week3/trigger_word_detection/logs/
+/week3/trigger_word_detection/models/
