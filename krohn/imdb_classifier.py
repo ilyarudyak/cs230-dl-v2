@@ -2,7 +2,7 @@ import keras
 from keras.datasets import imdb
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, Dropout, SpatialDropout1D, SimpleRNN, LSTM
+from keras.layers import Dense, Flatten, Dropout, SpatialDropout1D, SimpleRNN, LSTM, Bidirectional
 from keras.layers import Embedding # new!
 from keras.callbacks import ModelCheckpoint # new!
 import os # new!
@@ -126,8 +126,22 @@ class VanillaLSTMClassifier(Classifier):
         self.model.add(Dense(1, activation='sigmoid'))
 
 
+class BiLSTMClassifier(Classifier):
+    def __init__(self):
+        super().__init__()
+        self.output_dir = 'model_output/bi_lstm'
+        self.epochs = 6
+        self.max_review_length = 200  # doubled!
+
+    def build_model(self):
+        self.model.add(Embedding(self.n_unique_words, self.n_dim, input_length=self.max_review_length))
+        self.model.add(SpatialDropout1D(self.drop_embed))
+        self.model.add(Bidirectional(LSTM(self.n_lstm, dropout=self.drop_lstm)))
+        self.model.add(Dense(1, activation='sigmoid'))
+
+
 if __name__ == '__main__':
-    dm = VanillaLSTMClassifier()
+    dm = BiLSTMClassifier()
     dm.fit_model()
     dm.evaluate_model()
 
