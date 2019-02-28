@@ -2,7 +2,7 @@ import keras
 from keras.datasets import imdb
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, Dropout, SpatialDropout1D, SimpleRNN
+from keras.layers import Dense, Flatten, Dropout, SpatialDropout1D, SimpleRNN, LSTM
 from keras.layers import Embedding # new!
 from keras.callbacks import ModelCheckpoint # new!
 import os # new!
@@ -36,6 +36,10 @@ class Classifier:
         # RNN layer architecture:
         self.n_rnn = 256
         self.drop_rnn = 0.2
+
+        # LSTM layer architecture:
+        self.n_lstm = 256
+        self.drop_lstm = 0.2
 
         self.model = Sequential()
         self.build_model()
@@ -98,7 +102,7 @@ class RNNClassifier(Classifier):
     def __init__(self):
         super().__init__()
         self.output_dir = 'model_output/rnn'
-        self.epochs = 1
+        self.epochs = 16
 
     def build_model(self):
         self.model.add(Embedding(self.n_unique_words, self.n_dim,
@@ -108,8 +112,22 @@ class RNNClassifier(Classifier):
         self.model.add(Dense(1, activation='sigmoid'))
 
 
+class VanillaLSTMClassifier(Classifier):
+
+    def __init__(self):
+        super().__init__()
+        self.output_dir = 'model_output/vanilla_lstm'
+        self.epochs = 4
+
+    def build_model(self):
+        self.model.add(Embedding(self.n_unique_words, self.n_dim, input_length=self.max_review_length))
+        self.model.add(SpatialDropout1D(self.drop_embed))
+        self.model.add(LSTM(self.n_lstm, dropout=self.drop_lstm))
+        self.model.add(Dense(1, activation='sigmoid'))
+
+
 if __name__ == '__main__':
-    dm = DenseClassifier()
+    dm = VanillaLSTMClassifier()
     dm.fit_model()
     dm.evaluate_model()
 
