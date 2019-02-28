@@ -14,6 +14,7 @@
       <sourceFolder url="file://$MODULE_DIR$/week3/machine_translation" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/bleu" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/week3/trigger_word_detection" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/krohn" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="inheritedJdk" />
