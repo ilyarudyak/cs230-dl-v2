@@ -41,6 +41,10 @@ class Classifier:
         self.n_lstm = 256
         self.drop_lstm = 0.2
 
+        # stacked LSTM layer architecture:
+        self.n_lstm_1 = 64
+        self.n_lstm_2 = 64
+
         self.model = Sequential()
         self.build_model()
         self.compile_model()
@@ -140,8 +144,23 @@ class BiLSTMClassifier(Classifier):
         self.model.add(Dense(1, activation='sigmoid'))
 
 
+class StackedBiLSTMClassifier(Classifier):
+    def __init__(self):
+        super().__init__()
+        self.output_dir = 'model_output/stacked_bi_lstm'
+        self.epochs = 4
+        self.max_review_length = 200  # doubled!
+
+    def build_model(self):
+        self.model.add(Embedding(self.n_unique_words, self.n_dim, input_length=self.max_review_length))
+        self.model.add(SpatialDropout1D(self.drop_embed))
+        self.model.add(Bidirectional(LSTM(self.n_lstm_1, dropout=self.drop_lstm, return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(self.n_lstm_2, dropout=self.drop_lstm)))
+        self.model.add(Dense(1, activation='sigmoid'))
+
+
 if __name__ == '__main__':
-    dm = BiLSTMClassifier()
+    dm = StackedBiLSTMClassifier()
     dm.fit_model()
     dm.evaluate_model()
 
