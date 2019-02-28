@@ -22,11 +22,12 @@ class Classifier:
 
         # vector-space embedding:
         self.n_dim = 64
-        self.n_unique_words = 5000  # as per Maas et al. (2011); may not be optimal
-        self.n_words_to_skip = 50  # ditto
+        self.n_unique_words = 10000
+        self.n_words_to_skip = 50
         self.max_review_length = 100
         self.pad_type = self.trunc_type = 'pre'
         self.drop_embed = 0.2
+        self.n_test = 5000
 
         # dense network architecture:
         self.n_dense = 64
@@ -50,6 +51,11 @@ class Classifier:
         self.x_valid = pad_sequences(self.x_valid, maxlen=self.max_review_length,
                                      padding=self.pad_type, truncating=self.trunc_type, value=0)
 
+        self.x_test = self.x_valid[:self.n_test]
+        self.y_test = self.y_valid[:self.n_test]
+        self.x_valid = self.x_valid[self.n_test:]
+        self.y_valid = self.y_valid[self.n_test:]
+
     def build_model(self):
         raise NotImplementedError
 
@@ -64,6 +70,11 @@ class Classifier:
         self.model.fit(self.x_train, self.y_train, batch_size=self.batch_size,
                        epochs=self.epochs, verbose=1,
                        validation_data=(self.x_valid, self.y_valid), callbacks=[model_checkpoint])
+
+    def evaluate_model(self):
+        score, acc = self.model.evaluate(self.x_test, self.y_test,
+                                         batch_size=self.batch_size)
+        print(f'test loss:{score:.4f} test accuracy:{acc:.4f}')
 
 
 class DenseClassifier(Classifier):
@@ -87,7 +98,7 @@ class RNNClassifier(Classifier):
     def __init__(self):
         super().__init__()
         self.output_dir = 'model_output/rnn'
-        self.epochs = 16
+        self.epochs = 1
 
     def build_model(self):
         self.model.add(Embedding(self.n_unique_words, self.n_dim,
@@ -98,6 +109,7 @@ class RNNClassifier(Classifier):
 
 
 if __name__ == '__main__':
-    dm = RNNClassifier()
+    dm = DenseClassifier()
     dm.fit_model()
+    dm.evaluate_model()
 
